@@ -61,7 +61,7 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
-            padding-top: 20px;
+            padding-top: 25px;
         }
 
         .shield-icon {
@@ -69,12 +69,7 @@
             height: 80px;
             fill: var(--gold);
             margin-bottom: 15px;
-            animation: pulse 4s infinite ease-in-out;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05));
         }
 
         .hebrew-status {
@@ -93,6 +88,7 @@
             border-radius: 20px;
             font-size: 11px;
             font-weight: 700;
+            letter-spacing: 0.5px;
         }
 
         .info-card {
@@ -100,7 +96,7 @@
             background: var(--card-bg);
             border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            margin: 20px 0;
+            margin: 25px 0;
         }
 
         .detail-row {
@@ -114,25 +110,35 @@
         .label { color: var(--secondary); font-size: 14px; }
         .value { color: #1C1C1E; font-size: 14px; font-weight: 600; }
 
-        /* FIXED TERMINAL LOGS */
         .terminal {
             width: 90%;
             background: var(--terminal-bg);
             border-radius: 12px;
             padding: 12px;
-            font-family: 'SF Mono', monospace;
+            font-family: 'SF Mono', 'Menlo', monospace;
             font-size: 10px;
             color: #00FF41;
-            height: 120px;
+            height: 125px;
             display: flex;
             flex-direction: column;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
         #logs {
             flex: 1;
-            overflow-y: hidden; /* JavaScript will handle the "scroll to bottom" */
-            line-height: 1.4;
+            overflow: hidden;
+            line-height: 1.5;
         }
+
+        .log-entry {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 2px;
+            white-space: nowrap;
+        }
+
+        .hex-code { color: #00A3FF; }
+        .tag { color: rgba(0, 255, 65, 0.6); }
 
         .cursor {
             display: inline-block;
@@ -145,10 +151,9 @@
 
         @keyframes blink { 50% { opacity: 0; } }
 
-        /* FIXED FOOTER */
         .footer {
             width: 100%;
-            padding: 15px 20px 30px 20px; /* Extra bottom padding for iPhone home bar */
+            padding: 15px 20px 40px 20px;
             text-align: center;
             color: var(--secondary);
             font-size: 11px;
@@ -169,17 +174,17 @@
         <div class="status-badge">PROTECTION ENABLED</div>
 
         <div class="info-card">
-            <div class="detail-row"><span class="label">Policy</span><span class="value">Strict_Research_v6</span></div>
+            <div class="detail-row"><span class="label">Policy</span><span class="value">Strict_v6.2</span></div>
             <div class="detail-row"><span class="label">Status</span><span class="value" style="color:var(--green)">Active/Locked</span></div>
             <div class="detail-row"><span class="label">Session</span><span class="value" id="uptime">0s</span></div>
         </div>
 
         <div class="terminal">
             <div id="logs">
-                <div style="margin-bottom:2px">0x1A4F [SYS] Initialization...</div>
-                <div style="margin-bottom:2px">0xDE21 [NET] Secure Tunnel UP</div>
+                <div class="log-entry"><span class="hex-code">0x4F12</span> <span class="tag">[SYS]</span> <span>Kernel_Watchdog_Init</span></div>
+                <div class="log-entry"><span class="hex-code">0xBC88</span> <span class="tag">[NET]</span> <span>Handshake_Validated</span></div>
             </div>
-            <div style="color: #FFF; border-top: 1px solid #333; padding-top: 4px; margin-top: auto;">
+            <div style="color: #FFF; border-top: 1px solid #222; padding-top: 4px; margin-top: auto;">
                 root@meshumar:~$ <span class="cursor"></span>
             </div>
         </div>
@@ -187,34 +192,49 @@
 
     <div class="footer">
         <strong>Org ID:</strong> MSH-ENT-2026-SEARCH-TECH<br>
-        70,000 Word Progress Tracking Active
     </div>
 
     <script>
-        // Disable scroll
         document.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
 
-        // Uptime
         let sec = 0;
         setInterval(() => {
             sec++;
             document.getElementById('uptime').innerText = sec + 's';
         }, 1000);
 
-        // Terminal Log Management
+        const messages = [
+            "Syncing_Thread_04",
+            "Inspecting_Packet_Headers",
+            "Memory_Block_Verified",
+            "Cert_Authority_Confirmed",
+            "Refreshing_Rule_Set",
+            "Bypass_Attempt_Denied",
+            "Analyzing_Request_Origin",
+            "Data_Stream_Encrypted",
+            "Resource_Shield_Active",
+            "Protocol_Sequence_Match"
+        ];
+
+        const tags = ["[SYS]", "[NET]", "[SEC]", "[FLT]"];
+
         const logBox = document.getElementById('logs');
+        
         setInterval(() => {
             const hex = "0x" + Math.floor(Math.random()*0xFFFF).toString(16).toUpperCase();
+            const msg = messages[Math.floor(Math.random() * messages.length)];
+            const tag = tags[Math.floor(Math.random() * tags.length)];
+            
             const logEntry = document.createElement('div');
-            logEntry.style.marginBottom = "2px";
-            logEntry.innerHTML = `${hex} [FILTER] Packet inspected...`;
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `<span class="hex-code">${hex}</span> <span class="tag">${tag}</span> <span>${msg}</span>`;
+            
             logBox.appendChild(logEntry);
 
-            // AUTO-PURGE old logs so they never overflow the box
             if (logBox.children.length > 5) {
                 logBox.removeChild(logBox.firstChild);
             }
-        }, 3500);
+        }, 2800); // Slightly faster updates for a "busy" feel
     </script>
 </body>
 </html>
