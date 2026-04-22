@@ -19,6 +19,13 @@
             --terminal-bg: #0A0A0A;
         }
 
+        /* RESET & LOCK SCROLLING */
+        * {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
         body {
             font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
@@ -27,10 +34,15 @@
             flex-direction: column;
             align-items: center;
             height: 100vh;
+            width: 100vw;
             color: #1C1C1E;
-            /* Respects the iPhone notch/Dynamic Island */
             padding-top: env(safe-area-inset-top);
             padding-bottom: env(safe-area-inset-bottom);
+            
+            /* The Lockdown */
+            overflow: hidden;
+            position: fixed;
+            touch-action: none; 
         }
 
         .managed-banner {
@@ -132,16 +144,6 @@
         .label { color: var(--secondary); font-size: 14px; }
         .value { color: #1C1C1E; font-size: 14px; font-weight: 600; }
 
-        .terminal-header {
-            width: 90%;
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 6px;
-            padding: 0 5px;
-        }
-
-        .terminal-label { color: var(--secondary); font-size: 10px; font-weight: 700; font-family: monospace; }
-
         .terminal {
             width: 90%;
             background: var(--terminal-bg);
@@ -154,10 +156,6 @@
             box-sizing: border-box;
             border: 1px solid rgba(255,255,255,0.1);
         }
-
-        .log-line { margin-bottom: 4px; display: flex; gap: 8px; }
-        .timestamp { color: rgba(0, 255, 65, 0.5); }
-        .hex { color: #00A3FF; }
 
         .cursor {
             display: inline-block;
@@ -181,7 +179,7 @@
 </head>
 <body>
 
-    <div class="managed-banner">Enforced by Meshumar Tech</div>
+    <div class="managed-banner">Enforced by Meshumar Enterprise</div>
 
     <div class="main-content">
         <div class="shield-container">
@@ -192,58 +190,53 @@
         </div>
 
         <div class="status-header">
-            <h1 class="hebrew-status">משומר</h1>
-            <div class="status-badge">FILTER ACTIVE</div>
+            <h1 class="hebrew-status">מְשׁוּמָר</h1>
+            <div class="status-badge">ACTIVE FILTER</div>
         </div>
 
         <div class="info-card">
-            <div class="detail-row"><span class="label">Policy Name</span><span class="value">Strict_Util_v4</span></div>
-            <div class="detail-row"><span class="label">Connection</span><span class="value" style="color:var(--green)">Verified</span></div>
-            <div class="detail-row"><span class="label">Uptime</span><span class="value" id="uptime">0s</span></div>
+            <div class="detail-row"><span class="label">Policy</span><span class="value">Strict_Research_v5</span></div>
+            <div class="detail-row"><span class="label">Status</span><span class="value" style="color:var(--green)">Locked (תַּקִין)</span></div>
+            <div class="detail-row"><span class="label">Session</span><span class="value" id="uptime">0s</span></div>
         </div>
 
-        <div class="terminal-header">
-            <span class="terminal-label">SYSTEM LOGS</span>
-            <span class="terminal-label" id="live-indicator">● LIVE</span>
-        </div>
         <div class="terminal" id="terminal">
-            <div class="log-line"><span class="timestamp" id="ts1">00.000</span> <span class="hex" id="hex1">0x4A1F</span> <span>SYS: Monitoring active</span></div>
-            <div class="log-line"><span class="timestamp" id="ts2">00.000</span> <span class="hex" id="hex2">0x9B2E</span> <span>NET: Tunnel established</span></div>
+            <div id="logs">
+                <div style="margin-bottom:4px">0x4F1A [SYSTEM] Protocol Init...</div>
+                <div style="margin-bottom:4px">0xBD22 [NETWORK] Tunneling Active</div>
+            </div>
             <div style="color: #FFF; margin-top: 5px;">root@meshumar:~$ <span class="cursor"></span></div>
         </div>
     </div>
 
     <div class="footer">
-        Device ID: <span id="dev-id">...</span><br>
-        This device is managed by organization policy.
+        Organization ID: MSH-2026-X<br>
+        70k Manuscript Mode Enabled
     </div>
 
     <script>
-        // Update Uptime
+        // LOCK THE SCREEN FROM BOUNCING
+        document.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+
+        // Uptime Counter
         let sec = 0;
         setInterval(() => {
             sec++;
             document.getElementById('uptime').innerText = sec + 's';
         }, 1000);
 
-        // Update High Precision Logs
-        function updateLogs() {
-            const now = new Date();
-            const timeStr = now.getSeconds() + "." + String(now.getMilliseconds()).padStart(3, '0');
-            document.getElementById('ts1').innerText = timeStr;
-            document.getElementById('ts2').innerText = timeStr;
-            requestAnimationFrame(updateLogs);
-        }
-        updateLogs();
-
-        // Generate static fake Device ID
-        document.getElementById('dev-id').innerText = Math.random().toString(16).substr(2, 8).toUpperCase();
-        
-        // Randomize Hex addresses occasionally
+        // Simulated Random Memory Addresses
         setInterval(() => {
-            document.getElementById('hex1').innerText = "0x" + Math.floor(Math.random()*0xFFFF).toString(16).toUpperCase();
-            document.getElementById('hex2').innerText = "0x" + Math.floor(Math.random()*0xFFFF).toString(16).toUpperCase();
-        }, 3000);
+            const logs = document.getElementById('logs');
+            const hex = "0x" + Math.floor(Math.random()*0xFFFF).toString(16).toUpperCase();
+            const newLine = document.createElement('div');
+            newLine.style.marginBottom = "4px";
+            newLine.innerHTML = `${hex} [FILTER] Re-evaluating...`;
+            logs.appendChild(newLine);
+            if(logs.children.length > 3) logs.removeChild(logs.firstChild);
+        }, 4000);
     </script>
 </body>
 </html>
